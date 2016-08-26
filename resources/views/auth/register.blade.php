@@ -15,7 +15,7 @@
         <div class="register-box-body">
             <p class="login-box-msg">Register a new membership</p>
 
-            <form action="{{ url('/auth/register') }}" method="post" autocomplete="off">
+            <form action="{{ url('/register') }}" method="post" autocomplete="off">
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                 <div class="form-group">
@@ -54,7 +54,7 @@
             </form>
 
             <div class="login-link">
-                <a href="{{ url('/auth/login') }}" class="text-center">I already have a membership</a>
+                <a href="{{ url('/login') }}" class="text-center">I already have a membership</a>
             </div>
         </div><!-- /.form-box -->
     </div><!-- /.register-box -->

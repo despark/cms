@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use Despark\Cms\Admin\Traits\AdminModelTrait;
 use Despark\Cms\Admin\Traits\UploadImagesTrait;
-use Despark\Cms\Models\AdminModel;
 use Cviebrock\EloquentSluggable\SluggableInterface;
 use Cviebrock\EloquentSluggable\SluggableTrait;
+use Illuminate\Database\Eloquent\Model;
 
-class SeoPage extends AdminModel implements SluggableInterface
+class SeoPage extends Model implements SluggableInterface
 {
-    use UploadImagesTrait;
-    use SluggableTrait;
+    use UploadImagesTrait, SluggableTrait, AdminModelTrait;
 
     protected $sluggable = [
         'build_from' => 'page_title',
@@ -40,15 +40,10 @@ class SeoPage extends AdminModel implements SluggableInterface
         'meta_image' => 'image|max:5000',
     ];
 
+    public $identifier = 'seo_page';
+
     public function getRulesUpdate()
     {
         return array_merge($this->rules, $this->rulesUpdate);
-    }
-
-    public function __construct(array $attributes = [])
-    {
-        $this->identifier = 'seo_page';
-
-        parent::__construct($attributes);
     }
 }

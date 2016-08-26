@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Http\Requests\AdminFormRequest;
 use App\Models\SeoPage;
+use Despark\Cms\Http\Requests\AdminFormRequest;
 
 class SeoPagesRequest extends AdminFormRequest
 {

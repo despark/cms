@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Despark\Cms\Admin\Traits\UploadImagesTrait;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
@@ -11,7 +11,7 @@ use Conner\Tagging\Taggable;
 use Despark\Cms\Admin\Traits\AdminImage;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Spatie\Permission\Traits\HasRoles;
-use Despark\Cms\Admin\Traits\AdminConfigTrait;
+use Despark\Cms\Admin\Traits\AdminModelTrait;
 
 class User extends Authenticatable implements
     AuthenticatableContract,
@@ -22,14 +22,10 @@ class User extends Authenticatable implements
     use Taggable;
     use AdminImage;
     use HasRoles;
-    use AdminConfigTrait;
+    use AdminModelTrait;
+    use UploadImagesTrait;
 
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-
-        $this->adminColumns = config('admin.user.adminColumns');
-    }
+    public $identifier = 'user';
 
     /**
      * The database table used by the model.
@@ -73,16 +69,4 @@ class User extends Authenticatable implements
         'password' => 'min:6|max:20|confirmed',
         'password_confirmation' => 'min:6|max:20',
     ];
-
-    public function adminSetFormFields()
-    {
-        $this->adminFormFields = config('admin.user.adminFormFields');
-
-        return $this;
-    }
-
-    public function getImageFields()
-    {
-        return config('admin.user.image_fields');
-    }
 }

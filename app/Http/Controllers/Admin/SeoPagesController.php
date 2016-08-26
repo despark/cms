@@ -16,9 +16,9 @@ class SeoPagesController extends AdminController
         parent::__construct();
 
         $this->sidebarItems['seo_pages']['isActive'] = true;
-        $this->viewData['createRoute'] = 'admin.seo_pages.create';
-        $this->viewData['editRoute'] = 'admin.seo_pages.edit';
-        $this->viewData['deleteRoute'] = 'admin.seo_pages.destroy';
+        $this->viewData['createRoute'] = 'seo_pages.create';
+        $this->viewData['editRoute'] = 'seo_pages.edit';
+        $this->viewData['deleteRoute'] = 'seo_pages.destroy';
     }
 
     /**
@@ -50,7 +50,7 @@ class SeoPagesController extends AdminController
 
         $this->viewData['actionVerb'] = 'Create';
         $this->viewData['formMethod'] = 'POST';
-        $this->viewData['formAction'] = 'admin.seo_pages.store';
+        $this->viewData['formAction'] = 'seo_pages.store';
 
         return view($this->defaultFormView, $this->viewData);
     }
@@ -76,7 +76,7 @@ class SeoPagesController extends AdminController
             'description' => 'SeoPage is created successfully!',
         ]);
 
-        return redirect(route('admin.seo_pages.edit', ['id' => $record->id]));
+        return redirect(route('seo_pages.edit', ['id' => $record->id]));
     }
 
     /**
@@ -93,7 +93,7 @@ class SeoPagesController extends AdminController
         $this->viewData['record'] = $record;
 
         $this->viewData['formMethod'] = 'PUT';
-        $this->viewData['formAction'] = 'admin.seo_pages.update';
+        $this->viewData['formAction'] = 'seo_pages.update';
 
         return view($this->defaultFormView, $this->viewData);
     }

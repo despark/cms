@@ -8,7 +8,7 @@
         <ul class="sidebar-menu">
             @foreach($sidebarItems as $sidebarItem)
                 <li class="treeview {{ ($sidebarItem['isActive']) ? 'active' : '' }}">
-                    @if ((isset($sidebarItem['permisionsNeeded']) and Auth::user()->can($sidebarItem['permisionsNeeded'])) or isset($sidebarItem['subMenu']))
+                    @if ((isset($sidebarItem['permissionsNeeded']) and Auth::user()->can($sidebarItem['permissionsNeeded'])) or isset($sidebarItem['subMenu']))
                         <a href="{{ $sidebarItem['link'] !== '#' ? route($sidebarItem['link']) : '#' }}">
                             <i class="fa {{ $sidebarItem['iconClass'] }}"></i>
                             <span>{{ $sidebarItem['name'] }}</span>
@@ -20,7 +20,7 @@
                     @if(isset($sidebarItem['subMenu']))
                         <ul class="treeview-menu">
                             @foreach($sidebarItem['subMenu'] as $sidebarSubItems=>$sidebarSubItem )
-                                @if ($sidebarSubItem['permisionsNeeded'] and Auth::user()->can($sidebarSubItem['permisionsNeeded']))
+                                @if ($sidebarSubItem['permissionsNeeded'] and Auth::user()->can($sidebarSubItem['permissionsNeeded']))
                                     <li class="{{ ($sidebarSubItem['isActive']) ? 'active' : '' }}">
                                         <a href="{{ $sidebarSubItem['link'] !== '#' ? route($sidebarSubItem['link']) : '#' }}">{{ $sidebarSubItem['name'] }}</a>
                                     </li>

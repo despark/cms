@@ -2,14 +2,19 @@
 
 namespace Despark\Cms\Providers;
 
+use Illuminate\Console\AppNamespaceDetectorTrait;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Router;
 use Illuminate\Foundation\AliasLoader;
 use File;
 use Despark\Cms\Admin\Admin;
+use Mailchimp;
+use Spatie\Permission\Contracts\Permission;
 
 class AdminServiceProvider extends ServiceProvider
 {
+    use AppNamespaceDetectorTrait;
+
     /**
      * The Artisan commands provided by starter kit.
      *
@@ -36,11 +41,17 @@ class AdminServiceProvider extends ServiceProvider
             __DIR__.'/../Http/resourcesRoutes.php' => app_path('Http/resourcesRoutes.php'),
         ]);
 
-        $router->group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
-            if (File::exists(app_path('Http/resourcesRoutes.php'))) {
-                require app_path('Http/resourcesRoutes.php');
-            }
-        });
+        // We need to know the namespace of the running app.
+        $router->group([
+            'namespace' => $this->getAppNamespace().'Http\Controllers',
+            'prefix' => 'admin',
+            'middleware' => 'auth',
+        ],
+            function () {
+                if (File::exists(app_path('Http/resourcesRoutes.php'))) {
+                    require app_path('Http/resourcesRoutes.php');
+                }
+            });
 
         // Register Assets
         $this->loadViewsFrom(__DIR__.'/../../resources/views', 'views');
@@ -88,7 +99,7 @@ class AdminServiceProvider extends ServiceProvider
         $configPaths = config('admin.bootstrap.paths');
         if ($configPaths) {
             foreach ($configPaths as $key => $path) {
-                if (!is_dir($path)) {
+                if ( ! is_dir($path)) {
                     mkdir($path, 775, true);
                 }
             }
@@ -109,7 +120,6 @@ class AdminServiceProvider extends ServiceProvider
         $this->app->register('Collective\Html\HtmlServiceProvider');
         $this->app->register('Intervention\Image\ImageServiceProvider');
         $this->app->register('Cviebrock\EloquentSluggable\SluggableServiceProvider');
-        $this->app->register('Skovmand\Mailchimp\MailchimpServiceProvider');
         $this->app->register('Roumen\Sitemap\SitemapServiceProvider');
         $this->app->register('Rutorika\Sortable\SortableServiceProvider');
         $this->app->register('Jenssegers\Agent\AgentServiceProvider');
@@ -124,5 +134,19 @@ class AdminServiceProvider extends ServiceProvider
         $loader->alias('Html', 'Collective\Html\HtmlFacade');
         $loader->alias('Image', 'Intervention\Image\Facades\Image');
         $loader->alias('Agent', 'Jenssegers\Agent\Facades\Agent');
+
+        /*
+         * Manually register Mailchimp
+         */
+        $this->app->singleton('Mailchimp', function ($app) {
+            $config = $app['config']['mailchimp'];
+
+            return new Mailchimp($config['apikey']);
+        });
+
+        /*
+         * Swap Permission model implementation
+         */
+        $this->app->bind(Permission::class, \Despark\Cms\Models\Permission::class);
     }
 }

@@ -2,19 +2,36 @@
 
 namespace Despark\Cms\Console\Commands\Compilers;
 
+use Despark\Cms\Console\Commands\AdminResourceCommand;
 use Illuminate\Console\Command;
 use Illuminate\Console\AppNamespaceDetectorTrait;
 
+/**
+ * Class ResourceCompiler
+ * @package Despark\Cms\Console\Commands\Compilers
+ */
 class ResourceCompiler
 {
     use AppNamespaceDetectorTrait;
 
+    /**
+     * @var Command|AdminResourceCommand
+     */
     protected $command;
 
+    /**
+     * @var
+     */
     protected $identifier;
 
+    /**
+     * @var
+     */
     protected $options;
 
+    /**
+     * @var array
+     */
     protected $modelReplacements = [
         ':identifier' => '',
         ':model_name' => '',
@@ -26,11 +43,17 @@ class ResourceCompiler
         ':table_name' => '',
     ];
 
+    /**
+     * @var array
+     */
     protected $configReplacements = [
         ':image_fields' => '',
         ':file_fields' => '',
     ];
 
+    /**
+     * @var array
+     */
     protected $controllerReplacements = [
         ':identifier' => '',
         ':model_name' => '',
@@ -43,9 +66,25 @@ class ResourceCompiler
     ];
 
     /**
+     * @var array
+     */
+    protected $routeActions = [
+        'index',
+        'store',
+        'create',
+        'update',
+        'show',
+        'destroy',
+        'edit',
+    ];
+
+    protected $routeNames = [];
+
+    /**
      * @param Command $command
-     * @param string  $modelClass
-     * @param string  $title
+     * @param         $identifier
+     * @param         $options
+     * @todo why setting options where we can get it from command? Either remove command or keep options.
      */
     public function __construct(Command $command, $identifier, $options)
     {
@@ -54,6 +93,11 @@ class ResourceCompiler
         $this->options = $options;
     }
 
+    /**
+     * @param $template
+     * @return string
+     * @throws \Exception
+     */
     public function render_model($template)
     {
         if ($this->options['image_uploads']) {
@@ -71,20 +115,51 @@ class ResourceCompiler
         $this->modelReplacements[':model_name'] = $this->command->model_name($this->identifier);
         $this->modelReplacements[':identifier'] = $this->identifier;
 
-        $route = "Route::resource('".str_plural($this->identifier)."', '".$this->getAppNamespace().
-            'Http\Controllers\Admin\\'.$this->command->controller_name($this->identifier)."');".PHP_EOL;
+        $identifierPlural = str_plural($this->identifier);
+
+        // Check to see if route is not already used
+        if (\Route::has($identifierPlural.'.index')) {
+            // Check if admin is also free
+            if (\Route::has('admin.'.$identifierPlural.'.index')) {
+                throw new \Exception('Resource `'.$this->identifier.'` already exists');
+            }
+            // We need to append admin
+            foreach ($this->routeActions as $action) {
+                $this->routeNames[$action] = 'admin.'.$identifierPlural.'.'.$action;
+            }
+
+        }
+
+        $route = "Route::resource('".$identifierPlural."', '".$this->getAppNamespace().
+            'Http\Controllers\Admin\\'.$this->command->controller_name($this->identifier)."'";
+        if ( ! empty($this->routeNames)) {
+            // create the resource names
+            $route .= ",[".PHP_EOL."'names' => [".PHP_EOL;
+            foreach ($this->routeNames as $action => $name) {
+                $route .= "'$action' => '$name',".PHP_EOL;
+            }
+            $route .= ']'.PHP_EOL.']);'.PHP_EOL;
+
+        } else {
+            // Close the Route resource
+            $route .= ');'.PHP_EOL;
+        }
         if ($this->options['file_uploads']) {
-            $route .= "Route::get('".str_plural($this->identifier)."/delete/{fileFieldName}', '".$this->getAppNamespace().
+            $route .= "Route::get('".$identifierPlural."/delete/{fileFieldName}', '".$this->getAppNamespace().
                 'Http\Controllers\Admin\\'.$this->command->controller_name($this->identifier)."@deleteFile');".PHP_EOL;
         }
 
-        file_put_contents(app_path('Http/resourcesRoutes.php'), $route, FILE_APPEND);
+        $this->appendToFile(app_path('Http/resourcesRoutes.php'), $route);
 
         $template = strtr($template, $this->modelReplacements);
 
         return $template;
     }
 
+    /**
+     * @param $template
+     * @return string
+     */
     public function render_config($template)
     {
         if ($this->options['image_uploads']) {
@@ -119,6 +194,10 @@ class ResourceCompiler
         return $template;
     }
 
+    /**
+     * @param $template
+     * @return string
+     */
     public function render_request($template)
     {
         $this->modelReplacements[':app_namespace'] = $this->getAppNamespace();
@@ -130,6 +209,10 @@ class ResourceCompiler
         return $template;
     }
 
+    /**
+     * @param $template
+     * @return string
+     */
     public function render_controller($template)
     {
         $this->controllerReplacements[':app_namespace'] = $this->getAppNamespace();
@@ -138,16 +221,19 @@ class ResourceCompiler
         $this->controllerReplacements[':request_name'] = $this->command->request_name($this->identifier);
         $this->controllerReplacements[':controller_name'] = $this->command->controller_name($this->identifier);
         $this->controllerReplacements[':identifier'] = $this->identifier;
+
+        $routeName = empty($this->routeNames) ? str_plural($this->identifier) : 'admin.'.str_plural($this->identifier);
+
         if ($this->options['create']) {
-            $this->controllerReplacements[':create_route'] = '$this->viewData'."['createRoute'] = 'admin.".str_plural($this->identifier).".create';";
+            $this->controllerReplacements[':create_route'] = '$this->viewData'."['createRoute'] = '".$routeName.".create';";
         }
 
         if ($this->options['edit']) {
-            $this->controllerReplacements[':edit_route'] = '$this->viewData'."['editRoute'] = 'admin.".str_plural($this->identifier).".edit';";
+            $this->controllerReplacements[':edit_route'] = '$this->viewData'."['editRoute'] = '".$routeName.".edit';";
         }
 
         if ($this->options['destroy']) {
-            $this->controllerReplacements[':destroy_route'] = '$this->viewData'."['deleteRoute'] = 'admin.".str_plural($this->identifier).".destroy';";
+            $this->controllerReplacements[':destroy_route'] = '$this->viewData'."['deleteRoute'] = '".$routeName.".destroy';";
         }
 
         $template = strtr($template, $this->controllerReplacements);
@@ -155,6 +241,10 @@ class ResourceCompiler
         return $template;
     }
 
+    /**
+     * @param $template
+     * @return string
+     */
     public function render_migration($template)
     {
         $this->controllerReplacements[':migration_class'] = 'Create'.str_plural(studly_case($this->identifier)).'Table';
@@ -163,5 +253,18 @@ class ResourceCompiler
         $template = strtr($template, $this->controllerReplacements);
 
         return $template;
+    }
+
+    /**
+     * @param $file
+     * @param $content
+     * @throws \Exception
+     */
+    public function appendToFile($file, $content)
+    {
+        if ( ! file_exists($file)) {
+            throw new \Exception('File is missing');
+        }
+        file_put_contents($file, $content, FILE_APPEND);
     }
 }

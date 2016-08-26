@@ -20,9 +20,9 @@ class RolesController extends AdminController
         $this->sidebarItems['users']['subMenu']['roles']['isActive'] = true;
 
         $this->viewData['pageTitle'] = 'Roles';
-        $this->viewData['editRoute'] = 'admin.roles.edit';
-        $this->viewData['createRoute'] = 'admin.roles.create';
-        $this->viewData['deleteRoute'] = 'admin.roles.destroy';
+        $this->viewData['editRoute'] = 'roles.edit';
+        $this->viewData['createRoute'] = 'roles.create';
+        $this->viewData['deleteRoute'] = 'roles.destroy';
     }
 
     /**
@@ -54,7 +54,7 @@ class RolesController extends AdminController
 
         $this->viewData['actionVerb'] = 'Create';
         $this->viewData['formMethod'] = 'POST';
-        $this->viewData['formAction'] = 'admin.roles.store';
+        $this->viewData['formAction'] = 'roles.store';
 
         return view($this->defaultFormView, $this->viewData);
     }
@@ -83,7 +83,7 @@ class RolesController extends AdminController
             'description' => 'Role is created successfully!',
         ]);
 
-        return redirect(route('admin.roles.edit', ['id' => $record->id]));
+        return redirect(route('roles.edit', ['id' => $record->id]));
     }
 
     /**
@@ -100,7 +100,7 @@ class RolesController extends AdminController
         $this->viewData['record'] = $record;
 
         $this->viewData['formMethod'] = 'PUT';
-        $this->viewData['formAction'] = 'admin.roles.update';
+        $this->viewData['formAction'] = 'roles.update';
 
         return view($this->defaultFormView, $this->viewData);
     }

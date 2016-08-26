@@ -17,10 +17,5 @@ class :model_name extends AdminModel
 
     protected $rules = [];
 
-    public function __construct(array $attributes = [])
-    {
-        $this->identifier = ':identifier';
-
-        parent::__construct($attributes);
-    }
+    protected $identifier = ':identifier';
 }

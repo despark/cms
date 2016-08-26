@@ -16,7 +16,8 @@
                 <div class="box-body">
                     <div id="data-table_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">
                         @if(isset($createRoute))
-                            <a href="{{ route($createRoute) }}" class="btn btn-success pull-left">+ {{ trans('admin.add') }} {{ str_singular($pageTitle) }}</a>
+                            <a href="{{ route($createRoute) }}"
+                               class="btn btn-success pull-left">+ {{ trans('admin.add') }} {{ str_singular($pageTitle) }}</a>
                         @endif
                         <div class="row">
                             <div class="col-sm-12">
@@ -24,58 +25,58 @@
                                        aria-describedby="data-table_info">
                                     <thead>
                                     <tr>
-                                        @foreach($model->adminTableColumns() as $col)
+                                        @foreach($model->getAdminTableColumns() as $col)
                                             <th class="{{ array_get($col, 'type') }}">{{ $col['name'] }}</th>
                                         @endforeach
                                         <th class="no-sort actions-col">{{ trans('admin.actions') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody class="sortable" data-entityname="{{ strtolower($pageTitle) }}">
-                                        @forelse ($records as $record)
-                                            <tr data-itemId="{{{ $record->id }}}">
-                                                @foreach($model->adminTableColumns() as $col)
-                                                    <td data-order="{{ $record->{$col['db_field']} }}">
-                                                        {!! $model->renderTableRow($record, $col) !!}
-                                                    </td>
-                                                @endforeach
-                                                <td class="actions-cell">
-                                                    @if(isset($editRoute))
-                                                        <a href="{{ route($editRoute, ['id' => $record->id]) }}"
-                                                           class="btn btn-primary">
-                                                            {{ trans('admin.edit') }}
-                                                        </a>
-                                                    @endif
+                                    @forelse ($records as $record)
+                                        <tr data-itemId="{{ $record->id }}">
+                                            @foreach($model->getAdminTableColumns() as $col)
+                                                <td data-order="{{ $record->{$col['db_field']} }}">
+                                                    {!! $model->renderTableRow($record, $col) !!}
+                                                </td>
+                                            @endforeach
+                                            <td class="actions-cell">
+                                                @if(isset($editRoute))
+                                                    <a href="{{ route($editRoute, ['id' => $record->id]) }}"
+                                                       class="btn btn-primary">
+                                                        {{ trans('admin.edit') }}
+                                                    </a>
+                                                @endif
 
-                                                    @if(isset($deleteRoute))
+                                                @if(isset($deleteRoute))
                                                     <a href="#"
-                                                        class="js-open-delete-modal btn btn-danger"
-                                                        data-record="{{ json_encode($record->toArray()) }}"
-                                                        data-delete-url="{{ route($deleteRoute, ['id' => $record->id]) }}">
+                                                       class="js-open-delete-modal btn btn-danger"
+                                                       data-record="{{ json_encode($record->toArray()) }}"
+                                                       data-delete-url="{{ route($deleteRoute, ['id' => $record->id]) }}">
                                                         {{ trans('admin.delete') }}
                                                     </a>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                @foreach($model->adminTableColumns() as $key => $col)
-                                                    @if($key == 0)
-                                                        <td>{{ trans('admin.noData') }}</td>
-                                                    @else
-                                                        <td>-</td>
-                                                    @endif
-                                                @endforeach
-                                                <td>-</td>
-                                            </tr>
-                                        @endforelse
+                                                @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            @foreach($model->getAdminTableColumns() as $key => $col)
+                                                @if($key == 0)
+                                                    <td>{{ trans('admin.noData') }}</td>
+                                                @else
+                                                    <td>-</td>
+                                                @endif
+                                            @endforeach
+                                            <td>-</td>
+                                        </tr>
+                                    @endforelse
                                     </tbody>
                                     <tfoot>
-                                        <tr>
-                                            @foreach($model->adminTableColumns() as $col)
-                                                <th>{{ $col['name'] }}</th>
-                                            @endforeach
-                                            <th>{{ trans('admin.actions') }}</th>
-                                        </tr>
+                                    <tr>
+                                        @foreach($model->getAdminTableColumns() as $col)
+                                            <th>{{ $col['name'] }}</th>
+                                        @endforeach
+                                        <th>{{ trans('admin.actions') }}</th>
+                                    </tr>
                                     </tfoot>
                                 </table>
                             </div>
@@ -87,32 +88,35 @@
     </div>
 
     @if(isset($deleteRoute))
-    <div class="modal modal-danger fade" id="delete-modal" tabindex="-1" role="dialog" aria-labelledby="deleteModal">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-target="#delete-modal" data-dismiss="modal" aria-label="{{ trans('admin.close') }}"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title">{{ trans('admin.deleteTitle') }}</h4>
-            </div>
-            <div class="modal-body">
-                <p>
-                    {{ trans('admin.deleteConfirm') }}
-                </p>
-            </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline pull-left" data-target="#delete-modal" data-dismiss="modal">{{ trans('admin.close') }}</button>
-                    <form method="POST" action="" class="delete-form">
-                        <input type="hidden" name="_token" value="{!! csrf_token() !!}" />
-                        <input type="hidden" name="_method" value="DELETE" />
+        <div class="modal modal-danger fade" id="delete-modal" tabindex="-1" role="dialog"
+             aria-labelledby="deleteModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-target="#delete-modal" data-dismiss="modal"
+                                aria-label="{{ trans('admin.close') }}"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">{{ trans('admin.deleteTitle') }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>
+                            {{ trans('admin.deleteConfirm') }}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline pull-left" data-target="#delete-modal"
+                                data-dismiss="modal">{{ trans('admin.close') }}</button>
+                        <form method="POST" action="" class="delete-form">
+                            <input type="hidden" name="_token" value="{!! csrf_token() !!}"/>
+                            <input type="hidden" name="_method" value="DELETE"/>
 
-                        <button type="submit" type="button" class="delete-btn btn btn-outline">
-                            {{ trans('admin.delete') }}
-                        </button>
-                    </form>
+                            <button type="submit" type="button" class="delete-btn btn btn-outline">
+                                {{ trans('admin.delete') }}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
     @endif
 @stop
 
@@ -125,19 +129,19 @@
         });
 
         // Sortable
-        var changePosition = function(requestData){
+        var changePosition = function (requestData) {
             $.ajax({
                 url: '/sort',
                 type: 'POST',
                 data: requestData,
-                success: function(data) {
+                success: function (data) {
                     if (data.success) {
                         console.log('Sort: success!');
                     } else {
                         console.log(data.errors);
                     }
                 },
-                error: function(e) {
+                error: function (e) {
                     console.log('Something went wrong! Error(' + e.status + '): ' + e.statusText);
                 }
             });
@@ -148,7 +152,7 @@
             $sortableTable.sortable({
                 handle: '.sortable-handle',
                 axis: 'y',
-                update: function(a, b){
+                update: function (a, b) {
                     var entityName = $(this).data('entityname');
                     var $sorted = b.item;
 
@@ -183,8 +187,8 @@
         $('.js-open-delete-modal').on('click', function (e) {
             e.preventDefault();
             var that = $(this),
-                $deleteModal = $('#delete-modal'),
-                deleteURL = that.data('delete-url');
+                    $deleteModal = $('#delete-modal'),
+                    deleteURL = that.data('delete-url');
 
             $deleteModal.find('.delete-form').attr('action', deleteURL);
 

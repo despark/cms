@@ -7,7 +7,7 @@ use Despark\Cms\Http\Controllers\Admin\AdminController;
 
 class ProfileController extends AdminController
 {
-    public function getEdit()
+    public function edit()
     {
         $this->viewData['record'] = \Auth::user();
 
@@ -18,7 +18,7 @@ class ProfileController extends AdminController
         return view($this->defaultFormView, $this->viewData);
     }
 
-    public function postUpdate(UserEditProfileRequest $request)
+    public function update(UserEditProfileRequest $request)
     {
         $input = $request->all();
 

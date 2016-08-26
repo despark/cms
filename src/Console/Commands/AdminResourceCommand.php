@@ -77,8 +77,13 @@ class AdminResourceCommand extends Command
         $this->saveResult($template, $path, $filename);
     }
 
-    protected static function normalize($str)
+    /**
+     * @param $str
+     * @return mixed|string
+     */
+    public static function normalize($str)
     {
+        return snake_case($str);
         $str[0] = strtolower($str[0]);
         $func = create_function('$c', 'return "_".strtolower($c[1]);');
 
@@ -128,7 +133,7 @@ class AdminResourceCommand extends Command
         }
     }
 
-    protected function getTemplate($type)
+    public function getTemplate($type)
     {
         return file_get_contents(__DIR__.DIRECTORY_SEPARATOR.'stubs'.DIRECTORY_SEPARATOR.$type.'.stub');
     }
@@ -138,7 +143,7 @@ class AdminResourceCommand extends Command
         $file = $path.DIRECTORY_SEPARATOR.$filename;
         if (File::exists($file)) {
             $result = $this->confirm('File "'.$filename.'" already exist. Overwrite?', false);
-            if (!$result) {
+            if ( ! $result) {
                 return;
             }
         }
@@ -147,6 +152,10 @@ class AdminResourceCommand extends Command
         $this->info('File "'.$filename.'" was created.');
     }
 
+    /**
+     * @return string
+     * @todo this is not needed in the command we should move it into the compiler
+     */
     public function model_name()
     {
         return studly_case($this->identifier);

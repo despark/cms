@@ -2,23 +2,47 @@
 
 namespace App\Models;
 
-use Despark\Cms\Models\AdminModel;
+use Despark\Cms\Admin\Traits\AdminModelTrait;
+use Illuminate\Database\Eloquent\Model;
 
-class I18n extends AdminModel
+/**
+ * Class I18n
+ * @package App\Models
+ */
+class I18n extends Model
 {
+    use AdminModelTrait;
+
+    /**
+     * @var string
+     */
     protected $table = 'i18n';
 
+    /**
+     * @var array
+     */
     protected $fillable = [
         'locale',
         'name',
         'is_active',
     ];
 
+    /**
+     * @var string
+     */
+    public $identifier = 'i18n';
+
+    /**
+     * @return mixed
+     */
     public static function getList()
     {
         return static::lists('name', 'id')->all();
     }
 
+    /**
+     * @return $this|\Illuminate\Database\Eloquent\Builder
+     */
     public function newQuery()
     {
         $query = parent::newQuery();
@@ -28,12 +52,5 @@ class I18n extends AdminModel
         }
 
         return $query;
-    }
-
-    public function __construct(array $attributes = [])
-    {
-        $this->identifier = 'i18n';
-
-        parent::__construct($attributes);
     }
 }

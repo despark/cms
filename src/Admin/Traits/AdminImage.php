@@ -10,9 +10,18 @@ use Intervention\Image\Facades\Image;
  */
 trait AdminImage
 {
+    /**
+     * @var int
+     */
     public static $portrait = 1;
+    /**
+     * @var int
+     */
     public static $landscape = 2;
 
+    /**
+     * @var array
+     */
     public $dimensions = [
         '1' => [
             ['w' => 920, 'h' => 575],
@@ -26,16 +35,26 @@ trait AdminImage
         ],
     ];
 
+    /**
+     * @param $orientation
+     * @return mixed
+     */
     public function getImageByOrientation($orientation)
     {
         return $this->images()->where('orientation', '=', $orientation)->first();
     }
 
+    /**
+     * @return mixed
+     */
     public function images()
     {
         return $this->morphMany('Despark\Cms\Models\Image', 'imageable');
     }
 
+    /**
+     * @param $options
+     */
     public function addImages($options)
     {
         $imageFields = $this->getFiledFromPost($options);
@@ -55,6 +74,10 @@ trait AdminImage
         }
     }
 
+    /**
+     * @param $data
+     * @return array
+     */
     public function getFiledFromPost($data)
     {
         $images = [];
@@ -68,6 +91,11 @@ trait AdminImage
         return $images;
     }
 
+    /**
+     * @param $image
+     * @param $orientation
+     * @return string
+     */
     public function uploadImage($image, $orientation)
     {
         $fileExtension = $image->getClientOriginalExtension();
@@ -91,6 +119,9 @@ trait AdminImage
         return $fileName;
     }
 
+    /**
+     * @return array|mixed|string
+     */
     public function recordDirectory()
     {
         $modelDir = explode('Models', get_class($this));
@@ -99,24 +130,33 @@ trait AdminImage
         $modelDir = strtolower($modelDir).DIRECTORY_SEPARATOR;
         $modelDir = 'uploads'.DIRECTORY_SEPARATOR.$modelDir;
 
-        if (!File::isDirectory(public_path($modelDir))) {
+        if ( ! File::isDirectory(public_path($modelDir))) {
             File::makeDirectory(public_path($modelDir));
         }
 
         $modelDir = strtolower($modelDir).$this->id.DIRECTORY_SEPARATOR;
 
-        if (!File::isDirectory(public_path($modelDir))) {
+        if ( ! File::isDirectory(public_path($modelDir))) {
             File::makeDirectory(public_path($modelDir));
         }
 
         return $modelDir;
     }
 
+    /**
+     * @param $orientation
+     * @return mixed
+     */
     public function getDimensions($orientation)
     {
         return isset($this->modelDimensions) ? $this->modelDimensions[$orientation] : $this->dimensions[$orientation];
     }
 
+    /**
+     * @param $file
+     * @param $dimensions
+     * @return string
+     */
     public function fileNameByDimension($file, $dimensions)
     {
         $nameAndExtension = $this->filenameAndExtension($file);
@@ -124,6 +164,10 @@ trait AdminImage
         return $nameAndExtension['fileName'].'__'.$dimensions['w'].'x'.$dimensions['h'].'.'.$nameAndExtension['extension'];
     }
 
+    /**
+     * @param $fileName
+     * @return array
+     */
     public function filenameAndExtension($fileName)
     {
         $_arr = explode('.', $fileName);
@@ -136,6 +180,11 @@ trait AdminImage
         return ['fileName' => $fileName, 'extension' => $extension];
     }
 
+    /**
+     * @param $image
+     * @param $orientation
+     * @return string
+     */
     public function getAdminImageFile($image, $orientation)
     {
         foreach ($this->getDimensions($orientation) as $dimensions) {
@@ -147,6 +196,11 @@ trait AdminImage
         return $this->recordDirectory().$this->fileNameByDimension($image, $admin_dimensions);
     }
 
+    /**
+     * @param     $orientation
+     * @param int $dimensionsKey
+     * @return string
+     */
     public function getFilePathByOrientation($orientation, $dimensionsKey = 0)
     {
         if ($imagePath = $this->imageFileByOrientation($orientation)) {
@@ -155,6 +209,10 @@ trait AdminImage
         }
     }
 
+    /**
+     * @param $orientation
+     * @return bool
+     */
     public function imageFileByOrientation($orientation)
     {
         if ($this->images()->where('orientation', '=', $orientation)->first()) {
@@ -164,6 +222,11 @@ trait AdminImage
         return false;
     }
 
+    /**
+     * @param int    $orientation
+     * @param string $dimension
+     * @return mixed
+     */
     public function getAdminDimensions($orientation = 1, $dimension = 'w')
     {
         foreach ($this->getDimensions($orientation) as $dimensions) {

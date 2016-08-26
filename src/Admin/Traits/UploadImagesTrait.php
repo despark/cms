@@ -7,10 +7,20 @@ use Intervention\Image\Facades\Image;
 use File;
 use Illuminate\Support\Facades\Request;
 
+/**
+ * Class UploadImagesTrait
+ * @package Despark\Cms\Admin\Traits
+ */
 trait UploadImagesTrait
 {
+    /**
+     * @var string
+     */
     public $uploadDir = 'uploads';
 
+    /**
+     * @param array $options
+     */
     public function saveImages(array $options = [])
     {
         $imageFields = $this->getImageFields();
@@ -35,15 +45,16 @@ trait UploadImagesTrait
                             break;
 
                         case 'resize':
-                            $image->resize($thumbnailOptions['width'], $thumbnailOptions['height'], function ($constraint) {
-                                $constraint->aspectRatio();
-                            });
+                            $image->resize($thumbnailOptions['width'], $thumbnailOptions['height'],
+                                function ($constraint) {
+                                    $constraint->aspectRatio();
+                                });
                             break;
                     }
 
                     $thumbnailPath = $this->getThumbnailPath($thumbnailName);
 
-                    if (!File::isDirectory($thumbnailPath)) {
+                    if ( ! File::isDirectory($thumbnailPath)) {
                         File::makeDirectory($thumbnailPath);
                     }
 
@@ -57,6 +68,9 @@ trait UploadImagesTrait
         }
     }
 
+    /**
+     * @return array|mixed|string
+     */
     public function getCurrentUploadDir()
     {
         $modelDir = explode('Models', get_class($this));
@@ -69,23 +83,40 @@ trait UploadImagesTrait
         return $modelDir;
     }
 
+    /**
+     * @param string $thumbnailType
+     * @return string
+     */
     public function getThumbnailPath($thumbnailType = 'original')
     {
         return $this->getCurrentUploadDir().DIRECTORY_SEPARATOR.$thumbnailType.DIRECTORY_SEPARATOR;
     }
 
+    /**
+     * @param        $fieldName
+     * @param string $thumbnailType
+     * @return bool|string
+     */
     public function getImageThumbnailPath($fieldName, $thumbnailType = 'original')
     {
         $modelImageFields = $this->getImageFields();
 
-        if (!array_key_exists($fieldName, $modelImageFields)) {
+        if ( ! array_key_exists($fieldName, $modelImageFields)) {
             return false;
         }
 
-        if (!array_key_exists($thumbnailType, $modelImageFields[$fieldName]['thumbnails'])) {
+        if ( ! array_key_exists($thumbnailType, $modelImageFields[$fieldName]['thumbnails'])) {
             $thumbnailType = 'original';
         }
 
         return $this->getThumbnailPath($thumbnailType).$this->$fieldName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getImageFields()
+    {
+        return config('admin.'.$this->identifier.'.image_fields');
     }
 }

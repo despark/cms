@@ -15,7 +15,7 @@
             'enctype'=> 'multipart/form-data', ]
         ) !!}
 
-            {{ $record->buildForm() }}
+            {!! $record->buildForm() !!}
 
             <button type="submit" class="btn btn-primary">Save</button>
             {!! $record->adminPreviewButton() !!}

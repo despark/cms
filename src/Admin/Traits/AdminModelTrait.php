@@ -4,13 +4,16 @@ namespace Despark\Cms\Admin\Traits;
 
 use Despark\Cms\Admin\Helpers\FormBuilder;
 use App\Models\I18n;
+use Despark\Cms\src\Admin\Observers\AdminObserver;
 use Illuminate\Support\Facades\Request;
 
 /**
- * Class AdminConfigTrait.
+ * Class AdminModelTrait
+ * @package Despark\Cms\Admin\Traits
  */
-trait AdminConfigTrait
+trait AdminModelTrait
 {
+
     /**
      * @array $adminColumns table columns in admin list page
      */
@@ -38,11 +41,43 @@ trait AdminConfigTrait
     public $adminPreviewUrlParams = [];
 
     /**
+     * Model boot method.
+     */
+    public static function bootAdminModelTrait()
+    {
+        static::observe(AdminObserver::class);
+    }
+
+    public function getIdentifier()
+    {
+        if ( ! isset($this->identifier)) {
+            throw new \Exception('Missing required property `identifier` in: '.__CLASS__);
+        }
+
+        return $this->identifier;
+    }
+
+    /**
      * @return mixed
      */
-    public function adminTableColumns()
+    public function getAdminTableColumns()
     {
+        if ( ! isset($this->adminColumns)) {
+            $this->adminColumns = config('admin.'.$this->getIdentifier().'.adminColumns', []);
+        }
+
         return $this->adminColumns;
+    }
+
+    /**
+     * @param array $columns
+     * @return $this
+     */
+    public function setAdminTableColumns(array $columns)
+    {
+        $this->adminColumns = $columns;
+
+        return $this;
     }
 
     /**
@@ -170,7 +205,22 @@ trait AdminConfigTrait
      */
     public function getFormFields()
     {
-        return $this->adminSetFormFields()->adminFormFields;
+        if ( ! isset($this->adminFormFields)) {
+            $this->adminFormFields = config('admin.'.$this->getIdentifier().'.adminFormFields');
+        }
+
+        return $this->adminFormFields;
+    }
+
+    /**
+     * @param array $formFields
+     * @return $this
+     */
+    public function setFormFields(array $formFields)
+    {
+        $this->adminFormFields = $formFields;
+
+        return $this;
     }
 
     /**
@@ -193,7 +243,7 @@ trait AdminConfigTrait
      * Generate preview button for the CMS
      * $adminPreviewMode should be true.
      *
-     *@return string
+     * @return string
      */
     public function adminPreviewButton()
     {

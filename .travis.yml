@@ -1,0 +1,29 @@
+language: php
+dist: trusty
+sudo: required
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+php:
+  - 7.0
+
+install:
+  # create a new database for the hyn connection
+  - export DB_USERNAME=igni DB_DATABASE=ignitest DB_PASSWORD= QUEUE_DRIVER=sync
+  # specify the laravel service providers to insert
+  - export PACKAGE_PROVIDER="Despark\\Cms\\Providers\\AdminServiceProvider::class"
+  #specify the seed class to seed the data
+  #- export SEED_CLASS=TestSeeds::class
+  #run the setup script
+  - curl -s https://raw.githubusercontent.com/despark/ignicms/3.0/tests/scripts/travisci/setup.sh | bash
+
+script:
+  - cd laravel
+  - cp vendor/$TRAVIS_REPO_SLUG/tests/config/.env ./.env
+  - composer update
+  - php artisan vendor:publish --force
+  - php artisan migrate --seed #setups the migrations and seeding
+  - vendor/bin/phpunit "vendor/$TRAVIS_REPO_SLUG" #runs the phpunit just for your package.
