@@ -374,14 +374,19 @@ class Image extends Model implements ImageContract
      * @return string
      * @throws \Exception
      */
-    public function toHtml($thumb)
+    public function toHtml($thumb, $attributes = [])
     {
+        $htmlAttributes = '';
+ +      foreach ($attributes as $key => $attribute) {
+ +            $htmlAttributes .= $key.'="'.$attribute.'" ';
+ +      }
+        
         if ($this->exists) {
             if (! in_array($thumb, $this->getThumbnails())) {
                 throw new \Exception('Thumbnail '.$thumb.' not defined');
             }
 
-            return view('ignicms::image.default', ['image' => $this, 'thumb' => $thumb])->render();
+            return view('ignicms::image.default', ['image' => $this, 'thumb' => $thumb, 'attributes' => $htmlAttributes])->render();
         }
     }
 
