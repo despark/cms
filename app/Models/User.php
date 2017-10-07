@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Conner\Tagging\Taggable;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 use Despark\Cms\Admin\Traits\AdminModelTrait;
@@ -18,7 +17,6 @@ class User extends Authenticatable implements
     CanResetPasswordContract
 {
     use CanResetPassword;
-    use Taggable;
     use HasRoles;
     use AdminModelTrait;
 
